@@ -2,7 +2,7 @@ package monix.connect.redis
 
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.matchers.should.Matchers
-import io.lettuce.core.{RedisClient, ScoredValue}
+import io.lettuce.core.{KeyValue, RedisClient, ScoredValue}
 import io.lettuce.core.api.StatefulRedisConnection
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
@@ -25,6 +25,16 @@ class RedisIntegrationTest extends AnyFlatSpec with Matchers with BeforeAndAfter
   } yield values
 
   implicit val connection: StatefulRedisConnection[String, String] = RedisClient.create(redisUrl).connect()
+
+  s"${RedisSortedSet}" should "access non existing key in redis and get None" in {
+    val key: K = genRedisKey.sample.get
+    val value: V = genRedisValue.sample.get
+
+    val t: Task[Option[KeyValue[K, ScoredValue[String]]]] = RedisSortedSet.bzpopmax(4L, key)
+
+    val r: Option[KeyValue[K, ScoredValue[String]]] = t.runSyncUnsafe()
+    r shouldBe None
+  }
 
   s"${RedisHash}" should "access non existing key in redis and get None" in {
     //given

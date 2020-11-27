@@ -30,4 +30,14 @@ package object redis {
       }
   }
 
+  private[redis] implicit class MonoOps[A](mono: Mono[A]) {
+    def optional: Mono[Option[A]] = {
+      mono.map(new java.util.function.Function[A, Option[A]] {
+        override def apply(t: A): Option[A] = {
+          Option(t)
+        }
+      })
+    }
+  }
+
 }
