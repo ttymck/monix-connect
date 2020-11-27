@@ -42,8 +42,8 @@ private[redis] trait RedisSortedSet {
     */
   def bzpopmax[K, V](timeout: Long, keys: K*)(
     implicit
-    connection: StatefulRedisConnection[K, V]): Task[Option[KeyValue[K, ScoredValue[V]]]] =
-    Task.fromReactivePublisher(connection.reactive().bzpopmax(timeout, keys: _*))
+    connection: StatefulRedisConnection[K, V]): Task[KeyValue[K, ScoredValue[V]]] =
+    Task.from(connection.reactive().bzpopmax(timeout, keys: _*))
 
   /**
     * Add one or more members to a sorted set, or update its score if it already exists.

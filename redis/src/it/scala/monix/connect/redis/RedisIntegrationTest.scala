@@ -12,29 +12,12 @@ import org.scalatest.flatspec.AnyFlatSpec
 
 import scala.concurrent.duration._
 
-class RedisIntegrationTest extends AnyFlatSpec with Matchers with BeforeAndAfterEach with BeforeAndAfterAll {
-
-  val redisUrl = "redis://localhost:6379"
-  type K = String
-  type V = Int
-  val genRedisKey: Gen[K] = Gen.alphaStr
-  val genRedisValue: Gen[V] = Gen.choose(0, 10000)
-  val genRedisValues: Gen[List[V]] = for {
-    n      <- Gen.chooseNum(2, 10)
-    values <- Gen.listOfN(n, Gen.choose(0, 10000))
-  } yield values
-
-  implicit val connection: StatefulRedisConnection[String, String] = RedisClient.create(redisUrl).connect()
-
-  s"${RedisSortedSet}" should "access non existing key in redis and get None" in {
-    val key: K = genRedisKey.sample.get
-    val value: V = genRedisValue.sample.get
-
-    val t: Task[Option[KeyValue[K, ScoredValue[String]]]] = RedisSortedSet.bzpopmax(4L, key)
-
-    val r: Option[KeyValue[K, ScoredValue[String]]] = t.runSyncUnsafe()
-    r shouldBe None
-  }
+class RedisIntegrationTest
+  extends AnyFlatSpec
+    with Matchers
+    with BeforeAndAfterEach
+    with BeforeAndAfterAll
+    with RedisIntegrationFixture {
 
   s"${RedisHash}" should "access non existing key in redis and get None" in {
     //given
